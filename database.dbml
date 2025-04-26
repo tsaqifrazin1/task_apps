@@ -1,0 +1,40 @@
+Table "tasks" {
+  "id" varchar(255) [pk, not null]
+  "completed" bool [not null]
+  "completed_at" timestamptz
+  "created_at" timestamptz
+  "due_date" timestamp
+  "notes" varchar(255)
+  "priority" varchar(255)
+  "title" varchar(255) [not null]
+  "user_id" varchar(255)
+}
+
+Table "tags" {
+  "id" varchar(255) [pk, not null]
+  "name" varchar(255) [unique, not null]
+  "user_id" varchar(255)
+}
+
+Table "task_tags" {
+  "task_id" varchar(255) [not null]
+  "tag_id" varchar(255) [not null]
+
+  Indexes {
+    (task_id, tag_id) [type: btree, name: "task_tags_pkey"]
+  }
+}
+
+Table "users" {
+  "id" varchar(255) [pk, not null]
+  "password" varchar(255)
+  "username" varchar(255) [unique]
+}
+
+Ref "fkpsynysaxl7cyw8mr5c8xevneg":"users"."id" < "tags"."user_id"
+
+Ref "fk7xi1reghkj37gqwlr1ujxrxll":"tasks"."id" < "task_tags"."task_id"
+
+Ref "fkeiqe3k9ent7icelm1cihqn164":"tags"."id" < "task_tags"."tag_id"
+
+Ref "fk6s1ob9k4ihi75xbxe2w0ylsdh":"users"."id" < "tasks"."user_id"
