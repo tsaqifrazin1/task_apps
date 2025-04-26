@@ -13,6 +13,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import test.samir.be.app.auth.model.LoginDTO;
 import test.samir.be.app.auth.model.TokenDTO;
 import test.samir.be.app.common.response.WebResponse;
+import test.samir.be.app.tags.TagRepository;
+import test.samir.be.app.task.TaskRepository;
 import test.samir.be.app.user.User;
 import test.samir.be.app.user.UserRepository;
 import test.samir.be.app.user.model.CreateUserDTO;
@@ -37,6 +39,12 @@ public class AuthControllerTest {
     private UserRepository userRepository;
 
     @Autowired
+    private TaskRepository taskRepository;
+
+    @Autowired
+    private TagRepository tagRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -44,6 +52,8 @@ public class AuthControllerTest {
 
     @BeforeEach
     void setUp(){
+        tagRepository.deleteAll();
+        taskRepository.deleteAll();
         userRepository.deleteAll();
     }
 

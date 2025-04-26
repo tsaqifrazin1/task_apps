@@ -10,20 +10,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import test.samir.be.app.common.constant.PriorityEnum;
 import test.samir.be.app.common.response.WebResponse;
+import test.samir.be.app.common.utils.JwtUtils;
 import test.samir.be.app.tags.Tag;
 import test.samir.be.app.tags.TagRepository;
 import test.samir.be.app.tags.model.FilterTagDTO;
 import test.samir.be.app.tags.model.TagResponse;
 import test.samir.be.app.task.TaskRepository;
+import test.samir.be.app.user.User;
+import test.samir.be.app.user.UserRepository;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,6 +34,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SpringBootTest(properties = "spring.profiles.active=test")
 public class TagControllerTest {
+    private String accessToken;
+
+    private User user;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -42,9 +47,35 @@ public class TagControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtUtils jwtUtils;
+
     @BeforeEach
     void setUp(){
+        taskRepository.deleteAll();
         tagRepository.deleteAll();
+        userRepository.deleteAll();
+
+        user = userRepository.findByUsername("Username");  // replace with the username you are using
+        if (Objects.isNull(user)) {
+            user = new User();
+            user.setId(UUID.randomUUID().toString());
+            user.setUsername("Username");
+            user.setPassword(passwordEncoder.encode("rahasia"));
+            userRepository.save(user);
+        }
+
+        userRepository.save(user);
+
+        accessToken = jwtUtils.generateAccessToken(user.getUsername());
     }
 
     @Test
@@ -69,6 +100,7 @@ public class TagControllerTest {
 
         mockMvc.perform(
                 get("/api/tags")
+                        .header("Authorization", "Bearer " + accessToken)
                         .queryParam("name", filterTagDTO.getName())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
